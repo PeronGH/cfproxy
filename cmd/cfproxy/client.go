@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
 	"strings"
 
@@ -17,11 +19,11 @@ const (
 )
 
 type connectOptions struct {
-	target   string
-	local    string
-	logger   *zerolog.Logger
-	clientId string
-	clientSecret   string
+	target       string
+	local        string
+	logger       *zerolog.Logger
+	clientId     string
+	clientSecret string
 }
 
 func connect(options *connectOptions) error {
@@ -66,8 +68,34 @@ func connect(options *connectOptions) error {
 				destination += ":80"
 			}
 
-			// TODO: implement non-CONNECT proxy
-			http.Error(w, "Non-CONNECT proxy not implemented", http.StatusNotImplemented)
+			// Modify request and dump it
+			reqURL, err := url.Parse(r.RequestURI)
+			if err == nil {
+				r.RequestURI = ""
+				r.URL = reqURL
+			}
+
+			reqBytes, err := httputil.DumpRequest(r, false)
+
+			fmt.Println(string(reqBytes))
+			if err != nil {
+				http.Error(w, "Failed to read request", http.StatusInternalServerError)
+				return
+			}
+
+			hijacker := w.(http.Hijacker)
+			client, _, err := hijacker.Hijack()
+			if err != nil {
+				options.logger.Error().Err(err).Msg("Failed to hijack connection")
+				return
+			}
+			defer client.Close()
+
+			// create prepended reader
+			pr := newPrependedReader(client, reqBytes)
+			rw := newReaderWriter(pr, client)
+
+			forward(rw, destination)
 			return
 		}
 
