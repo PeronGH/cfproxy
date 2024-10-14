@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/http/httputil"
@@ -77,7 +76,6 @@ func connect(options *connectOptions) error {
 
 			reqBytes, err := httputil.DumpRequest(r, false)
 
-			fmt.Println(string(reqBytes))
 			if err != nil {
 				http.Error(w, "Failed to read request", http.StatusInternalServerError)
 				return
