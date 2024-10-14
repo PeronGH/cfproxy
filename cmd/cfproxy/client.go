@@ -75,7 +75,6 @@ func connect(options *connectOptions) error {
 			}
 
 			reqBytes, err := httputil.DumpRequest(r, false)
-
 			if err != nil {
 				http.Error(w, "Failed to read request", http.StatusInternalServerError)
 				return
