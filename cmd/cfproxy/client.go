@@ -64,7 +64,7 @@ func connect(options *connectOptions) error {
 		if r.Method != http.MethodConnect {
 			// Modify request and dump it
 			reqURL, err := url.Parse(r.RequestURI)
-			if err != nil || reqURL.Scheme == "" {
+			if err != nil || reqURL.Scheme != "http" {
 				http.Error(w, "Not Found", http.StatusNotFound)
 				return
 			}
@@ -73,15 +73,7 @@ func connect(options *connectOptions) error {
 
 			destination := reqURL.Host
 			if reqURL.Port() == "" {
-				switch reqURL.Scheme {
-				case "http":
-					destination += ":80"
-				case "https":
-					destination += ":443"
-				default:
-					http.Error(w, "Unsupported protocol", http.StatusUnsupportedMediaType)
-					return
-				}
+				destination += ":80"
 			}
 
 			reqBytes, err := httputil.DumpRequest(r, false)
