@@ -43,14 +43,13 @@ func main() {
 				},
 				Action: func(context *cli.Context) error {
 					logger := zerolog.New(os.Stderr).With().Timestamp().Logger()
-					connect(&connectOptions{
+					return connect(&connectOptions{
 						target:       context.String("target"),
 						local:        context.String("local"),
 						logger:       &logger,
 						clientId:     context.String("client-id"),
 						clientSecret: context.String("client-secret"),
 					})
-					return nil
 				},
 			},
 			{
