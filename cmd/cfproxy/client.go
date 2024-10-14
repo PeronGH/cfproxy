@@ -12,7 +12,6 @@ import (
 )
 
 const (
-	LogFieldHost               = "host"
 	cfAccessClientIDHeader     = "Cf-Access-Client-Id"
 	cfAccessClientSecretHeader = "Cf-Access-Client-Secret"
 )
