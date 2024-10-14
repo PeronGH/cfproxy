@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"strings"
 
 	"github.com/cloudflare/cloudflared/carrier"
 	"github.com/rs/zerolog"
@@ -63,16 +62,26 @@ func connect(options *connectOptions) error {
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Handle non-tunneling requests
 		if r.Method != http.MethodConnect {
-			destination := r.Host
-			if !strings.Contains(destination, ":") {
-				destination += ":80"
-			}
-
 			// Modify request and dump it
 			reqURL, err := url.Parse(r.RequestURI)
-			if err == nil {
-				r.RequestURI = ""
-				r.URL = reqURL
+			if err != nil || reqURL.Scheme == "" {
+				http.Error(w, "Not Found", http.StatusNotFound)
+				return
+			}
+			r.RequestURI = ""
+			r.URL = reqURL
+
+			destination := reqURL.Host
+			if reqURL.Port() == "" {
+				switch reqURL.Scheme {
+				case "http":
+					destination += ":80"
+				case "https":
+					destination += ":443"
+				default:
+					http.Error(w, "Unsupported protocol", http.StatusUnsupportedMediaType)
+					return
+				}
 			}
 
 			reqBytes, err := httputil.DumpRequest(r, false)
