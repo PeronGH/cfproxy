@@ -14,6 +14,7 @@ func (pr *prependedReader) Read(p []byte) (n int, err error) {
 	if !pr.prepended {
 		n = copy(p, pr.prepend)
 		pr.prepended = true
+		pr.prepend = nil
 		return
 	}
 	return pr.r.Read(p)
