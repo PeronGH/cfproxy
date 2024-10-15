@@ -17,11 +17,12 @@ func main() {
 			{
 				Name:    "connect",
 				Aliases: []string{"c"},
+				Usage:   "Connect to the proxy server",
 				Flags: []cli.Flag{
 					&cli.StringFlag{
 						Name:     "target",
 						Aliases:  []string{"T"},
-						Usage:    "Target address to connect to",
+						Usage:    "Address of the proxy server to connect to",
 						Required: true,
 					},
 					&cli.StringFlag{
@@ -59,6 +60,7 @@ func main() {
 					fmt.Println("SERVE")
 					return nil
 				},
+				Hidden: true,
 			},
 		},
 	}
